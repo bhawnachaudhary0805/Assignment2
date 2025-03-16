@@ -21,7 +21,7 @@ pipeline {
         stage('Docker Build & Run') {
             steps {
                 sh "docker build -t ${IMAGE_NAME} ."
-                sh "docker run -d -p 8080:8080 ${IMAGE_NAME}"
+                sh "docker run -d -p 9090:8080 ${IMAGE_NAME}"
             }
         }
     }
