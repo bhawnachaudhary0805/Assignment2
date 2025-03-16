@@ -1,27 +1,46 @@
 pipeline {
     agent any
-
-    environment {
-        IMAGE_NAME = "bhawnachaudhary/2022BCD0059"
+     environment {
+        DOCKER_CLI_PATH = '/usr/local/bin/docker'
     }
-
+    tools {
+        maven 'maven-3.9.9'
+    }
     stages {
-        stage('Clone Repo') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/bhawnachaudhary0805/Assignment2'
+                git 'https://github.com/bhawnachaudhary0805/Assignment2.git'
             }
         }
-
         stage('Build') {
             steps {
                 sh 'mvn clean package'
             }
         }
-
-        stage('Docker Build & Run') {
+        stage('Test') {
             steps {
-                sh "docker build -t ${IMAGE_NAME} ."
-                sh "docker run -d -p 9090:8080 ${IMAGE_NAME}"
+                sh 'mvn test'
+            }
+        }
+        stage('Docker Cleanup') { 
+            steps {
+                sh '''#!/bin/bash
+                CONTAINER_ID=$($DOCKER_CLI_PATH ps -q --filter ancestor=bhawnachaudhary/2022bcd0059)
+                if [ ! -z "$CONTAINER_ID" ]; then
+                    echo "Stopping and removing old container..."
+                    $DOCKER_CLI_PATH stop $CONTAINER_ID
+                    $DOCKER_CLI_PATH rm $CONTAINER_ID
+                else
+                    echo "No running container found."
+                fi
+                '''
+            }
+        }
+
+         stage('Docker Build & Run') {
+            steps {
+                sh '$DOCKER_CLI_PATH build -t bhawnachaudhary/2022bcd0059 .'
+                sh '$DOCKER_CLI_PATH run -d -p 9090:8080 bhawnachaudhary/2022bcd0059' 
             }
         }
     }
