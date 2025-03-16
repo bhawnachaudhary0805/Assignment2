@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git 
+                git 'https://github.com/bhawnachaudhary0805/Assignment2'
             }
         }
 
