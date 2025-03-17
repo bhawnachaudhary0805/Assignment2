@@ -2,6 +2,9 @@ pipeline {
     agent any
      environment {
         DOCKER_CLI_PATH = '/usr/local/bin/docker'
+        SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_PROJECT_KEY = 'java-service'
+        SONAR_LOGIN_TOKEN = credentials('jenkins-sonar-token')
     }
     tools {
         maven 'maven-3.9.9'
@@ -20,6 +23,16 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'mvn test'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                sh '''
+                mvn sonar:sonar \
+                    -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+                    -Dsonar.host.url=$SONAR_HOST_URL \
+                    -Dsonar.login=$SONAR_LOGIN_TOKEN
+                '''
             }
         }
         stage('Docker Cleanup') { 
